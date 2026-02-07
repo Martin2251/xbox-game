@@ -1,0 +1,114 @@
+:root {
+  --xbox-green: #107c10;
+  --xbox-dark-gray: #1a1a1a;
+  --xbox-slate: #2b2b2b;
+  --xbox-text: #ffffff;
+}
+
+body {
+  background-color: var(--xbox-dark-gray);
+  color: var(--xbox-text);
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  margin: 0;
+  padding: 20px;
+}
+
+.search-container {
+  text-align: center;
+  margin-bottom: 40px;
+}
+
+input {
+  background: var(--xbox-slate);
+  border: 2px solid transparent;
+  color: white;
+  padding: 12px 20px;
+  width: 350px;
+  font-size: 1rem;
+  outline: none;
+  transition: border 0.3s;
+}
+
+input:focus {
+  border-color: var(--xbox-green);
+}
+
+button {
+  background: var(--xbox-green);
+  color: white;
+  border: none;
+  padding: 12px 25px;
+  font-weight: bold;
+  cursor: pointer;
+  text-transform: uppercase;
+  margin-left: 10px;
+}
+
+/* The Tile Grid */
+.game-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 20px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+/* The Xbox "Tile" */
+.game-card {
+  background: var(--xbox-slate);
+  padding: 20px;
+  border-left: 4px solid var(--xbox-green);
+  transition: transform 0.2s, box-shadow 0.2s;
+  cursor: pointer;
+}
+
+.game-card:hover {
+  transform: scale(1.05); /* The "Pop-out" effect */
+  box-shadow: 0 10px 20px rgba(0,0,0,0.5);
+  background: #333;
+}
+
+.game-card h3 {
+  margin-top: 0;
+  color: var(--xbox-green);
+  text-transform: uppercase;
+  font-size: 1.2rem;
+}
+
+.meta-info {
+  font-size: 0.85rem;
+  color: #aaa;
+  margin-bottom: 10px;
+  display: flex;
+  justify-content: space-between;
+}
+
+.description {
+  font-size: 0.95rem;
+  line-height: 1.4;
+}
+
+/* game skeleton */
+
+.skeleton {
+  background: #2b2b2b;
+  overflow: hidden;
+  position: relative;
+}
+
+.skeleton::after {
+  content: "";
+  position: absolute;
+  top: 0; left: 0; width: 100%; height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(16, 124, 16, 0.1), transparent);
+  animation: shimmer 1.5s infinite;
+}
+
+@keyframes shimmer {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(100%); }
+}
+
+.skeleton-title { height: 24px; width: 60%; background: #444; margin-bottom: 10px; }
+.skeleton-meta { height: 14px; width: 40%; background: #333; margin-bottom: 10px; }
+.skeleton-description { height: 60px; width: 100%; background: #333; }

@@ -1,0 +1,37 @@
+[
+    {
+        "title": "Halo Infinite",
+        "rating": "T (Teen)",
+        "duration": "20+ Hours (Campaign)",
+        "genre": "Shooter, Sci-Fi",
+        "description": "Master Chief returns to confront his most ruthless foe yet on the mysterious Zeta Halo. Experience an expansive open-world adventure combined with the classic tight arena combat that defined the series."
+    },
+    {
+        "title": "Forza Horizon 5",
+        "rating": "E (Everyone)",
+        "duration": "Endless / 100+ Hours",
+        "genre": "Racing, Open World",
+        "description": "Explore the vibrant and ever-evolving open-world landscapes of Mexico with limitless, fun driving action in hundreds of the world’s greatest cars. Features stunning biomes from living deserts to lush jungles."
+    },
+    {
+        "title": "Gears 5",
+        "rating": "M (Mature)",
+        "duration": "12 Hours (Campaign)",
+        "genre": "Cover Shooter, Action",
+        "description": "Kait Diaz breaks away to uncover her connection to the enemy and discovers the true danger to Sera – herself. Features a deep campaign, brutal multiplayer, and the intense Escape mode."
+    },
+    {
+        "title": "Starfield",
+        "rating": "M (Mature)",
+        "duration": "40-100+ Hours",
+        "genre": "RPG, Sci-Fi",
+        "description": "In this next-generation role-playing game set amongst the stars, create any character you want and explore with unparalleled freedom as you embark on an epic journey to answer humanity’s greatest mystery."
+    },
+    {
+        "title": "Sea of Thieves",
+        "rating": "T (Teen)",
+        "duration": "Endless",
+        "genre": "Action, Adventure, Multiplayer",
+        "description": "The quintessential pirate experience, from sailing and fighting to exploring and looting—everything you need to live the pirate life and become a legend in your own right."
+    }
+]
