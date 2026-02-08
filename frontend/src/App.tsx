@@ -1,25 +1,39 @@
+import { useState, useTransition, Suspense, use } from 'react';
 import './App.css';
 
-/* eslint-disable @typescript-eslint/no-explicit-any */
-import { Suspense, use, useState, useTransition } from 'react';
+// 1. DYNAMIC URL SETUP
+// Vite looks for VITE_BACKEND_URL in your Vercel settings.
+// If it doesn't find it, it defaults to localhost (for your dev work).
+const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || "http://localhost:3001";
 
-// 1. DATA FETCHING LOGIC (Must be outside the component to avoid re-creation)
-// In a real 2026 app, you'd use TanStack Query, but here is the raw 'use' pattern.
-let searchPromise: Promise<any> | null = null;
+interface XboxGame {
+  title: string;
+  rating: string;
+  duration: string;
+  genre: string;
+  description: string;
+}
+
+// 2. DATA FETCHING LOGIC
+let searchPromise: Promise<XboxGame[]> | null = null;
 let lastQuery = "";
 
-function fetchGames(query: string) {
+function fetchGames(query: string): Promise<XboxGame[]> | null {
+  if (!query) return null;
   if (query === lastQuery) return searchPromise;
+  
   lastQuery = query;
-  searchPromise = fetch('http://localhost:3001/search', {
+  // Use the dynamic BACKEND_URL variable here
+  searchPromise = fetch(`${BACKEND_URL}/search`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ query }),
   }).then(res => res.json());
+  
   return searchPromise;
 }
 
-// 2. SKELETON COMPONENT (The "Nice" part of Suspense)
+// 3. SKELETON COMPONENT
 const GameCardSkeleton = () => (
   <div className="game-card skeleton">
     <div className="skeleton-title" style={{ width: '70%', height: '24px', backgroundColor: '#333', marginBottom: '10px' }} />
@@ -28,45 +42,44 @@ const GameCardSkeleton = () => (
   </div>
 );
 
-// 3. RESULTS COMPONENT (Suspends while waiting)
+// 4. RESULTS COMPONENT
 function GameResults({ query }: { query: string }) {
   if (!query) return <p style={{ textAlign: 'center', color: '#666' }}>Enter a game or genre to begin...</p>;
   
-  // The 'use' hook tells React to suspend this component until searchPromise resolves
-  const games = use(fetchGames(query)!);
+  const games: XboxGame[] = use(fetchGames(query)!);
 
   return (
     <div className="game-grid">
-   
-      {games.map((game: any, index: number) => (
+      {games.length === 0 && <p>No games found. Try a different search!</p>}
+      {games.map((game, index) => (
         <div key={index} className="game-card">
           <h3>{game.title}</h3>
           <div className="meta-info">
             <span>{game.genre}</span>
             <span>{game.rating}</span>
           </div>
-          <p className="duration">⏳ {game.duration}</p>
-          <p className="description">{game.description}</p>
+          <p className="duration">⏳ {game.duration.replace(/[{}]/g, '')}</p>
+          <p className="description">{game.description.replace(/[{}]/g, '')}</p>
         </div>
       ))}
     </div>
   );
 }
 
-// 4. MAIN APP COMPONENT
+// 5. MAIN APP COMPONENT
 export default function App() {
   const [inputValue, setInputValue] = useState('');
   const [activeQuery, setActiveQuery] = useState('');
   const [isPending, startTransition] = useTransition();
 
   const handleSearch = () => {
-    // startTransition keeps the current results visible while the new ones load
     startTransition(() => {
       setActiveQuery(inputValue);
     });
   };
 
   return (
+    
     <div className="App" style={{ opacity: isPending ? 0.7 : 1, transition: 'opacity 0.2s' }}>
       <header className="search-container">
         <h1 style={{ color: '#107c10' }}>Xbox Search</h1>
@@ -85,7 +98,6 @@ export default function App() {
       </header>
 
       <main>
-        {/* Suspense catches the promise from the 'use' hook in GameResults */}
         <Suspense fallback={
           <div className="game-grid">
             {[1, 2, 3].map(i => <GameCardSkeleton key={i} />)}
