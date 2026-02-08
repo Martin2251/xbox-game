@@ -1,84 +1,86 @@
+Since you're using Gemini 2.5 Flash, we should definitely update the documentation and code to reflect that. It's the latest high-speed model as of early 2026, offering better reasoning and image understanding compared to the older 1.5 versions.
+
+Updated README.md
+Here is your finalized README, now reflecting the Gemini 2.5 Flash model and your current hosting setup.
+
 🎮 Xbox Game Search Engine
-A full-stack TypeScript application that uses Gemini 2.5 Flash to search a local game library and Supabase to store persistent data.
+A full-stack TypeScript application that uses Google Gemini 2.5 Flash to search a live Supabase database with a custom Xbox-inspired UI.
 
 🚀 The Tech Stack
 Frontend: React 19, Vite, TypeScript, CSS Grid (Xbox Theme).
 
 Backend: Node.js, Express, tsx.
 
-AI: Google Gemini 2.5 Flash (Free Tier).
+AI: Google Gemini 2.5 Flash (via Google AI SDK).
 
-Database: Supabase (PostgreSQL).
+Database: Supabase (PostgreSQL) — Hosts the game catalog and user data.
 
-Hosting: Railway (Backend) & Vercel (Frontend).
+Hosting: Render (Backend) & Vercel (Frontend).
 
-🛠 Step 1: Supabase Setup (Database)
-Create Account: Go to Supabase.com and create a new project.
+🛠 Step 1: Supabase Setup (The Brain)
+Create Project: Create a project at Supabase.com.
 
-Get Credentials: In your project settings, go to API and copy your Project URL and anon public key.
-
-Create Table: Go to the SQL Editor in Supabase and run this to create a table for user favorites:
+Create Game Catalog: Use the SQL Editor to create your main library:
 
 SQL
-create table favorite_games (
+create table games (
+  id uuid default gen_random_uuid() primary key,
+  title text not null,
+  genre text,
+  rating text,
+  duration text,
+  description text
+);
+Create Favorites Table:
+
+SQL
+create table favorites (
   id uuid default gen_random_uuid() primary key,
   created_at timestamptz default now(),
-  game_title text not null,
-  genre text,
-  user_id uuid default auth.uid() -- Optional: for when you add logins
+  title text not null
 );
-🚄 Step 2: Railway Setup (Backend Hosting)
-Railway will host your Node.js server.
+🚄 Step 2: Render Setup (Backend Hosting)
+Connect GitHub: Deploy your backend folder to Render.com.
 
-Push to GitHub: Ensure your project is in a GitHub repository.
-
-Connect Railway: Login to Railway.app and click "New Project" -> "Deploy from GitHub repo".
-
-Variables: In the Railway dashboard for your service, go to Variables and add:
+Environment Variables: In the Render dashboard, add:
 
 GEMINI_API_KEY: (Your key from Google AI Studio)
 
+SUPABASE_URL: (Your project URL)
+
+SUPABASE_KEY: (Your anon public key)
+
+FRONTEND_URL: https://xbox-game.vercel.app
+
 PORT: 3001
 
-Networking: Railway will give you a public URL (e.g., https://backend-production.up.railway.app). Copy this.
-
 💻 Step 3: Local Environment Variables
-Create a .env file in your backend folder and a .env.local in your frontend folder.
-
-Backend .env:
+Create a .env file in your backend folder:
 
 Plaintext
-GEMINI_API_KEY=your_google_key
+GEMINI_API_KEY=your_key
+SUPABASE_URL=your_url
+SUPABASE_KEY=your_key
+FRONTEND_URL=http://localhost:5173
 PORT=3001
-Frontend .env.local:
-
-Plaintext
-VITE_SUPABASE_URL=your_supabase_url
-VITE_SUPABASE_ANON_KEY=your_supabase_anon_key
-VITE_BACKEND_URL=https://your-railway-url.up.railway.app
 🏃 Step 4: Installation & Running
 Backend
+
 Bash
 cd backend
 npm install
-npm run dev # Starts with tsx watch
+npm run dev
 Frontend
+
 Bash
 cd frontend
 npm install
-npm run dev # Starts Vite
-📝 Important Deployment Notes
-CORS: In your server.ts, make sure you allow your Vercel URL:
+npm run dev
+📝 Key Features
+[x] Live DB Search: The AI reads directly from your Supabase games table.
 
-TypeScript
-app.use(cors({ origin: "https://your-app.vercel.app" }));
-Supabase Client: Use the createClient function in your React app to connect to the database.
+[x] Next-Gen AI: Uses Gemini 2.5 Flash for PhD-level reasoning and faster multimodal processing.
 
-🎨 Features
-[x] AI Search: Natural language searching via Gemini.
+[x] Xbox UI: Fully responsive grid with "pop-out" hover effects.
 
-[x] Xbox UI: Responsive grid with "pop-out" hover effects.
-
-[x] Bulletproof Sanitization: Automatically removes {} from LLM responses.
-
-[x] Nice Suspense: React 19 useTransition and Suspense for smooth loading.
+[x] Sanitized Responses: Custom recursive cleaner to remove stray {} or Markdown from AI outputs.
