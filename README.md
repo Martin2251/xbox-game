@@ -1,7 +1,3 @@
-Since you're using Gemini 2.5 Flash, we should definitely update the documentation and code to reflect that. It's the latest high-speed model as of early 2026, offering better reasoning and image understanding compared to the older 1.5 versions.
-
-Updated README.md
-Here is your finalized README, now reflecting the Gemini 2.5 Flash model and your current hosting setup.
 
 🎮 Xbox Game Search Engine
 A full-stack TypeScript application that uses Google Gemini 2.5 Flash to search a live Supabase database with a custom Xbox-inspired UI.
