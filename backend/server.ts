@@ -9,7 +9,10 @@ import type { Request, Response } from 'express'
 dotenv.config();
 
 const app = express();
-app.use(cors());
+app.use(cors({
+  origin: process.env.FRONTEND_URL || "http://localhost:5173", // Fallback to local dev port
+  methods: ["GET", "POST"]
+}));
 app.use(express.json());
 
 // 1. Load your local games data
@@ -89,6 +92,6 @@ app.post('/search', async (req: Request, res: Response) => {
 });
 
 const PORT = process.env.PORT || 3001;
-app.listen(PORT, () => {
-  console.log(`✅ Xbox API running on http://localhost:${PORT}`);
+app.listen(Number(PORT), '0.0.0.0', () => {
+  console.log(`✅ Xbox API is live on port ${PORT}`);
 });
