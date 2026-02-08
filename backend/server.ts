@@ -59,7 +59,7 @@ app.post('/search', async (req: Request, res: Response) => {
     }
 
     // 2. Pass the dynamic database data to Gemini
-    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+    const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
 
     const prompt = `
       You are an Xbox game expert. Based ONLY on the following list from my database:
