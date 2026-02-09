@@ -1,4 +1,4 @@
-import express, { Request, Response } from 'express';
+import express, { type Request, type Response } from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
 import { createClient } from '@supabase/supabase-js';
@@ -9,89 +9,49 @@ dotenv.config();
 const app = express();
 const PORT = process.env.PORT || 3001;
 
-// --- 1. CONFIGURATION ---
-
-// Allow your Vercel frontend and local testing
-const allowedOrigins = [process.env.FRONTEND_URL, 'http://localhost:5173'];
-app.use(cors({
-  origin: (origin, callback) => {
-    if (!origin || allowedOrigins.includes(origin)) {
-      callback(null, true);
-    } else {
-      callback(new Error('Not allowed by CORS'));
-    }
-  }
-}));
-
+app.use(cors({ origin: [process.env.FRONTEND_URL, 'http://localhost:5173'] }));
 app.use(express.json());
 
-// Initialize Supabase & Gemini
-const supabase = createClient(
-  process.env.SUPABASE_URL!, 
-  process.env.SUPABASE_KEY! // Uses the 'anon public' key
-);
+const supabase = createClient(process.env.SUPABASE_URL!, process.env.SUPABASE_KEY!);
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY!);
-
-// --- 2. THE SEARCH ROUTE (VECTOR SEARCH) ---
 
 app.post('/search', async (req: Request, res: Response) => {
   const { query } = req.body;
 
-  if (!query) {
-    return res.status(400).json({ error: "Query is required" });
-  }
-
   try {
-    console.log(`🔍 Searching for: "${query}"`);
-
-    // STEP A: Generate Vector Embedding for the search query
-    // We use gemini-embedding-001 to match our database records
+    // 1. EMBEDDING (FREE & STABLE)
+    // Uses gemini-embedding-001 (Generous quota for vectors)
     const embedModel = genAI.getGenerativeModel({ model: "gemini-embedding-001" });
-    const embResult = await embedModel.embedContent(query);
-    const queryVector = embResult.embedding.values;
+    const embRes = await embedModel.embedContent(query);
+    const vector = embRes.embedding.values;
 
-    // STEP B: Search Supabase using the match_games RPC function
-    const { data: matchedGames, error: dbError } = await supabase.rpc('match_games', {
-      query_embedding: queryVector,
-      match_threshold: 0.2, // 0.3 = broad search, 0.7 = very strict
-      match_count: 5        // Return top 5 games
+    // 2. VECTOR SEARCH
+    const { data: matchedGames, error } = await supabase.rpc('match_games', {
+      query_embedding: vector,
+      match_threshold: 0.3,
+      match_count: 5
     });
 
-    if (dbError) throw dbError;
+    if (error) throw error;
 
-    // STEP C: Use Gemini 2.5 Flash to rank and "talk" about these results
-    const chatModel = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
+    // 3. GENERATIVE RESPONSE (MOST GENEROUS FREE MODEL)
+    // Switching to 'gemini-2.5-flash-lite' for 1,000 requests/day
+    const chatModel = genAI.getGenerativeModel({ model: "gemini-2.5-flash-lite" });
     
     const prompt = `
-      You are an Xbox expert. The user is looking for: "${query}".
-      Below are the most relevant games found in our database:
-      ${JSON.stringify(matchedGames)}
-
-      Task: Based on these results, return a clean JSON array of games.
-      If a game doesn't strictly fit what the user asked, you can exclude it.
-      Return ONLY the JSON array.
+      User Query: "${query}"
+      Data: ${JSON.stringify(matchedGames)}
+      Task: Return only a JSON array of these games. Format: [{title, genre, rating, duration, description}].
     `;
 
-    const aiResult = await chatModel.generateContent(prompt);
-    const aiText = aiResult.response.text();
-    
-    // Clean up the response (remove markdown if Gemini adds it)
-    const cleanedJson = aiText.replace(/```json|```/g, '').trim();
-    
-    console.log("✅ Search successful!");
-    res.json(JSON.parse(cleanedJson));
+    const result = await chatModel.generateContent(prompt);
+    const cleanedJson = result.response.text().replace(/```json|```/g, '').trim();
 
+    res.json(JSON.parse(cleanedJson));
   } catch (err) {
-    console.error("❌ Search/Vector Error:", err);
-    res.status(500).json({ error: "Failed to process search" });
+    console.error("Search Error:", err);
+    res.status(500).json([]);
   }
 });
 
-// --- 3. HEALTH CHECK ---
-app.get('/', (req, res) => {
-  res.send('🎮 Xbox API is Live (Render + Supabase + Vector)');
-});
-
-app.listen(PORT, () => {
-  console.log(`✅ Server running on port ${PORT}`);
-});
+app.listen(PORT, () => console.log(`🚀 Generous API live on port ${PORT}`));
