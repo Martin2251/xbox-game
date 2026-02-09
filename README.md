@@ -13,6 +13,8 @@ Database: Supabase (PostgreSQL) — Hosts the game catalog and user data.
 
 Hosting: Render (Backend) & Vercel (Frontend).
 
+FYI: From a user points of view if you are searching a game for the first time the first search will be slow (about a minute) because it is a cold start and on a free plan on Render(Backend).
+
 🛠 Step 1: Supabase Setup (The Brain)
 Create Project: Create a project at Supabase.com.
 
