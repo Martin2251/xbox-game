@@ -1,4 +1,4 @@
-import express, { type Request, type Response } from 'express';
+import express, { Request, Response } from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
 import { createClient } from '@supabase/supabase-js';
@@ -53,7 +53,7 @@ app.post('/search', async (req: Request, res: Response) => {
     // STEP B: Search Supabase using the match_games RPC function
     const { data: matchedGames, error: dbError } = await supabase.rpc('match_games', {
       query_embedding: queryVector,
-      match_threshold: 0.3, // 0.3 = broad search, 0.7 = very strict
+      match_threshold: 0.2, // 0.3 = broad search, 0.7 = very strict
       match_count: 5        // Return top 5 games
     });
 
