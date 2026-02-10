@@ -1,9 +1,6 @@
 import { useState, useTransition, Suspense, use } from 'react';
 import './App.css';
 
-// 1. DYNAMIC URL SETUP
-// Vite looks for VITE_BACKEND_URL in your Vercel settings.
-// If it doesn't find it, it defaults to localhost (for your dev work).
 const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || "http://localhost:3001";
 
 interface XboxGame {
@@ -14,7 +11,7 @@ interface XboxGame {
   description: string;
 }
 
-// 2. DATA FETCHING LOGIC
+// DATA FETCHING LOGIC
 let searchPromise: Promise<XboxGame[]> | null = null;
 let lastQuery = "";
 
@@ -23,7 +20,6 @@ function fetchGames(query: string): Promise<XboxGame[]> | null {
   if (query === lastQuery) return searchPromise;
   
   lastQuery = query;
-  // Use the dynamic BACKEND_URL variable here
   searchPromise = fetch(`${BACKEND_URL}/search`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
@@ -33,7 +29,7 @@ function fetchGames(query: string): Promise<XboxGame[]> | null {
   return searchPromise;
 }
 
-// 3. SKELETON COMPONENT
+// SKELETON COMPONENT
 const GameCardSkeleton = () => (
   <div className="game-card skeleton">
     <div className="skeleton-title" style={{ width: '70%', height: '24px', backgroundColor: '#333', marginBottom: '10px' }} />
@@ -42,15 +38,24 @@ const GameCardSkeleton = () => (
   </div>
 );
 
-// 4. RESULTS COMPONENT
+// RESULTS COMPONENT
 function GameResults({ query }: { query: string }) {
-  if (!query) return <p style={{ textAlign: 'center', color: '#666' }}>Enter a game or genre to begin...</p>;
+  if (!query) return (
+    <div className="empty-state">
+      <p>Enter a game, genre, or even a "vibe" to begin...</p>
+      <div className="vibe-suggestions">
+        <span>Try: "Driving fast in Mexico"</span>
+        <span>Try: "I want to be a space pirate"</span>
+        <span>Try: "Games like Halo but with magic"</span>
+      </div>
+    </div>
+  );
   
   const games: XboxGame[] = use(fetchGames(query)!);
 
   return (
     <div className="game-grid">
-      {games.length === 0 && <p>No games found. Try a different search!</p>}
+      {games.length === 0 && <p>No games found. Our AI is stumped! Try a different search.</p>}
       {games.map((game, index) => (
         <div key={index} className="game-card">
           <h3>{game.title}</h3>
@@ -66,7 +71,7 @@ function GameResults({ query }: { query: string }) {
   );
 }
 
-// 5. MAIN APP COMPONENT
+// MAIN APP COMPONENT
 export default function App() {
   const [inputValue, setInputValue] = useState('');
   const [activeQuery, setActiveQuery] = useState('');
@@ -79,14 +84,26 @@ export default function App() {
   };
 
   return (
-    
-    <div className="App" style={{ opacity: isPending ? 0.7 : 1, transition: 'opacity 0.2s' }}>
+    <div className="App" style={{ opacity: isPending ? 0.8 : 1, transition: 'opacity 0.2s' }}>
       <header className="search-container">
-        <h1 style={{ color: '#107c10' }}>Xbox Search</h1>
+        <div className="brand">
+          <h1 style={{ color: '#107c10' }}>Xbox AI Search</h1>
+          <span className="badge">Vector Powered</span>
+        </div>
+
+        {/* AI Insight Bar */}
+        <div className="ai-insight">
+          <p>
+            ✨ <strong>Semantic Search Active:</strong> I find games based on 
+            <em> meaning</em>, not just keywords. You can search for descriptions, 
+            moods, or themes!
+          </p>
+        </div>
+
         <div className="input-group">
           <input 
             type="text" 
-            placeholder="Search e.g. 'Fast paced shooters'" 
+            placeholder="Describe a game... e.g. 'Scary game set in a forest'" 
             value={inputValue}
             onChange={(e) => setInputValue(e.target.value)}
             onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
@@ -95,6 +112,12 @@ export default function App() {
             {isPending ? 'Connecting...' : 'Search'}
           </button>
         </div>
+
+        {isPending && (
+          <p className="cold-start-note">
+            🚀 First search? Please wait ~60s for the server to wake up...
+          </p>
+        )}
       </header>
 
       <main>
@@ -106,6 +129,10 @@ export default function App() {
           <GameResults query={activeQuery} />
         </Suspense>
       </main>
+      
+      <footer className="footer">
+        <p>Powered by Gemini 2.5 Flash-Lite & Supabase Vector</p>
+      </footer>
     </div>
   );
 }

@@ -54,6 +54,59 @@ button:focus-visible {
   outline: 4px auto -webkit-focus-ring-color;
 }
 
+
+.badge {
+  background: #107c10;
+  color: white;
+  padding: 2px 8px;
+  border-radius: 12px;
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  font-weight: bold;
+  vertical-align: middle;
+  margin-left: 10px;
+}
+
+.ai-insight {
+  background: rgba(16, 124, 16, 0.1);
+  border-left: 4px solid #107c10;
+  padding: 10px 15px;
+  margin: 15px 0;
+  border-radius: 4px;
+  font-size: 0.9rem;
+  text-align: left;
+}
+
+.cold-start-note {
+  font-size: 0.8rem;
+  color: #aaa;
+  margin-top: 8px;
+  font-style: italic;
+}
+
+.vibe-suggestions {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+  flex-wrap: wrap;
+  margin-top: 15px;
+}
+
+.vibe-suggestions span {
+  background: #222;
+  padding: 5px 12px;
+  border-radius: 20px;
+  font-size: 0.8rem;
+  color: #888;
+  cursor: pointer;
+  border: 1px solid #333;
+}
+
+.vibe-suggestions span:hover {
+  border-color: #107c10;
+  color: #107c10;
+}
+
 @media (prefers-color-scheme: light) {
   :root {
     color: #213547;
