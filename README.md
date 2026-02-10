@@ -1,24 +1,27 @@
-
 🎮 Xbox Game Search Engine
-A full-stack TypeScript application that uses Google Gemini 2.5 Flash to search a live Supabase database with a custom Xbox-inspired UI.
+A full-stack TypeScript application that uses Google Gemini 2.5 Flash-Lite and Vector Embeddings to perform semantic searches on a live Supabase database.
+
+[!IMPORTANT] User Note: If you are searching for a game for the first time, the initial request may take about 60 seconds. This is due to a "cold start" on Render's free hosting tier. Subsequent searches will be much faster.
 
 🚀 The Tech Stack
 Frontend: React 19, Vite, TypeScript, CSS Grid (Xbox Theme).
 
 Backend: Node.js, Express, tsx.
 
-AI: Google Gemini 2.5 Flash (via Google AI SDK).
+AI (Reasoning): Google Gemini 2.5 Flash-Lite (Optimized for speed/free quota).
 
-Database: Supabase (PostgreSQL) — Hosts the game catalog and user data.
+AI (Embeddings): gemini-embedding-001 (3072-dimensional vectors).
+
+Database: Supabase (PostgreSQL) + pgvector extension.
 
 Hosting: Render (Backend) & Vercel (Frontend).
 
-FYI: From a user points of view if you are searching a game for the first time the first search will be slow (about a minute) because it is a cold start and on a free plan on Render(Backend).
+🛠 Step 1: Supabase Setup (Vector Engine)
+Enable Vector Extension: In your Supabase SQL Editor, run:
 
-🛠 Step 1: Supabase Setup (The Brain)
-Create Project: Create a project at Supabase.com.
-
-Create Game Catalog: Use the SQL Editor to create your main library:
+SQL
+create extension if not exists vector;
+Create Game Catalog: Use the SQL Editor to create the library with the embedding column:
 
 SQL
 create table games (
@@ -27,16 +30,26 @@ create table games (
   genre text,
   rating text,
   duration text,
-  description text
+  description text,
+  embedding vector(3072) -- Specifically for gemini-embedding-001
 );
-Create Favorites Table:
+Create the Search Function (RPC):
 
 SQL
-create table favorites (
-  id uuid default gen_random_uuid() primary key,
-  created_at timestamptz default now(),
-  title text not null
-);
+create or replace function match_games (
+  query_embedding vector(3072),
+  match_threshold float,
+  match_count int
+)
+returns setof games
+language sql stable
+as $$
+  select *
+  from games
+  where games.embedding <=> query_embedding < 1 - match_threshold
+  order by games.embedding <=> query_embedding asc
+  limit match_count;
+$$;
 🚄 Step 2: Render Setup (Backend Hosting)
 Connect GitHub: Deploy your backend folder to Render.com.
 
@@ -50,7 +63,7 @@ SUPABASE_KEY: (Your anon public key)
 
 FRONTEND_URL: https://xbox-game.vercel.app
 
-PORT: 3001
+PORT: 10000 (Render's default) or 3001.
 
 💻 Step 3: Local Environment Variables
 Create a .env file in your backend folder:
@@ -75,10 +88,17 @@ cd frontend
 npm install
 npm run dev
 📝 Key Features
-[x] Live DB Search: The AI reads directly from your Supabase games table.
+[x] Semantic Vector Search: Uses gemini-embedding-001 to find games based on "vibes" and context (e.g., searching "Mexico" finds Forza Horizon 5).
 
-[x] Next-Gen AI: Uses Gemini 2.5 Flash for PhD-level reasoning and faster multimodal processing.
+[x] Generous Free Tier: Optimized with Gemini 2.5 Flash-Lite to allow for high request volume without hitting API limits.
 
-[x] Xbox UI: Fully responsive grid with "pop-out" hover effects.
+[x] Xbox UI: Fully responsive grid with "pop-out" hover effects and Xbox-inspired design.
 
-[x] Sanitized Responses: Custom recursive cleaner to remove stray {} or Markdown from AI outputs.
+[x] Type-Safe: Built with strict TypeScript, including verbatimModuleSyntax for clean builds.
+
+🗺 Future Roadmap
+[ ] Speed Boost: Implement an HNSW index with halfvec(3072) to speed up searches as the library grows.
+
+[ ] Favorites Logic: Allow users to save games to a personal collection.
+
+[ ] Auth Integration: Connect Supabase Auth for persistent user profiles.
